@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Delhi Metro Journey Planner — Demo</title>
+<style>
+:root{--blue:#075aa8;--navy:#12365a;--light:#eef6ff;--orange:#f59e0b}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,"Noto Sans Devanagari",sans-serif;background:#f4f7fb;color:#172033}
+header{background:linear-gradient(120deg,#064e8a,#0878c9);color:white;padding:28px 16px}
+.wrap{max-width:900px;margin:auto}h1{margin:0 0 8px;font-size:clamp(25px,5vw,38px)}header p{margin:0;opacity:.95}
+main{padding:22px 14px}.card{background:white;border-radius:16px;padding:22px;margin:0 auto 18px;box-shadow:0 8px 28px #132b4512}
+h2{margin-top:0;color:var(--navy)}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+label{display:block;font-weight:700;margin-bottom:7px}select,input{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:9px;font-size:16px;background:white}
+button,.btn{border:0;background:var(--blue);color:white;border-radius:9px;padding:12px 16px;font-size:16px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-block}
+button:hover,.btn:hover{filter:brightness(.93)}.secondary{background:#e6f0fb;color:#064e8a}.warning{background:#fff7e6;border-left:4px solid var(--orange);padding:13px;border-radius:8px;line-height:1.5}
+.result{display:none;background:var(--light);padding:16px;border-radius:10px;line-height:1.7;margin-top:16px}
+small{color:#526176;line-height:1.5}.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:15px}footer{text-align:center;padding:20px;color:#5b6778}
+</style>
+</head>
+<body>
+<header><div class="wrap"><h1>🚇 Delhi Metro Journey Planner</h1><p>अपनी यात्रा की योजना बनाएँ और आधिकारिक टिकट बुकिंग पर जाएँ।</p></div></header>
+<main class="wrap">
+<section class="card">
+<h2>यात्रा चुनें</h2>
+<div class="grid">
+<div><label for="from">कहाँ से (From)</label><select id="from"></select></div>
+<div><label for="to">कहाँ तक (To)</label><select id="to"></select></div>
+<div><label for="people">यात्रियों की संख्या</label><select id="people"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option></select></div>
+</div>
+<div class="actions"><button id="plan">यात्रा विवरण देखें</button><button class="secondary" id="swap" type="button">स्टेशन बदलें ⇄</button></div>
+<div class="result" id="result" aria-live="polite"></div>
+</section>
+<section class="card">
+<h2>🎫 असली टिकट कैसे बुक करें?</h2>
+<p>दिल्ली मेट्रो में सामान्यतः सीट पहले से रिज़र्व नहीं होती। आप यात्रा के लिए QR टिकट खरीदते हैं। यह वेबसाइट केवल एक डेमो/यात्रा-प्लानर है; यह टिकट जारी नहीं करती और भुगतान नहीं लेती।</p>
+<div class="warning"><strong>ज़रूरी:</strong> इस पेज पर दिखाई देने वाला कोई भी यात्रा विवरण या डेमो टिकट वैध मेट्रो टिकट नहीं है। यात्रा से पहले आधिकारिक DMRC सेवा से टिकट खरीदें।</div>
+<div class="actions">
+<a class="btn" href="https://new.delhimetrorail.com/en/ticket" target="_blank" rel="noopener">DMRC की आधिकारिक टिकट जानकारी</a>
+<a class="btn secondary" href="https://delhimetrorail.com/app-based-qr-ticketing" target="_blank" rel="noopener">QR टिकट बुक करने के तरीके</a>
+<a class="btn secondary" href="https://new.delhimetrorail.com/en" target="_blank" rel="noopener">DMRC आधिकारिक वेबसाइट</a>
+</div>
+<p><small>किराया और रूट की पुष्टि आधिकारिक DMRC वेबसाइट/ऐप पर करें। इस डेमो में वास्तविक समय का किराया, ट्रेन समय, भुगतान, QR टिकट या सीट आरक्षण शामिल नहीं है।</small></p>
+</section>
+</main>
+<footer>Delhi Metro Journey Planner — Educational Demo</footer>
+<script>
+const stations = [
+"Adarsh Nagar","AIIMS","Akshardham","Anand Vihar","Arjan Garh","Ashok Park Main",
+"Azadpur","Badarpur Border","Barakhamba Road","Botanical Garden","Central Secretariat",
+"Chandni Chowk","Chawri Bazar","Civil Lines","Connaught Place / Rajiv Chowk",
+"Delhi Aerocity","Dhaula Kuan","Dwarka Sector 21","Dwarka","Ghitorni","Green Park",
+"INA","Inderlok","ITO","Janakpuri West","Jasola Apollo","Kalkaji Mandir","Kashmere Gate",
+"Karol Bagh","Kirti Nagar","Lajpat Nagar","Laxmi Nagar","Mayur Vihar-I","Moti Nagar",
+"New Delhi","Noida Sector 15","Noida Sector 18","Okhla Bird Sanctuary","Patel Chowk",
+"Pitampura","Pragati Maidan / Supreme Court","Punjabi Bagh West","Qutub Minar",
+"Rajendra Place","Ramesh Nagar","Saket","Shahdara","Shivaji Stadium","Subhash Nagar",
+"Udyog Bhawan","Vaishali","Vasant Vihar","Welcome","Yamuna Bank"
+];
+const from = document.getElementById("from"), to = document.getElementById("to");
+function addOptions(el){el.innerHTML="";stations.forEach(s=>{const o=document.createElement("option");o.value=s;o.textContent=s;el.appendChild(o)})}
+addOptions(from);addOptions(to);from.value="New Delhi";to.value="Rajiv Chowk";
+document.getElementById("plan").addEventListener("click",()=>{
+ const a=from.value,b=to.value,n=Number(document.getElementById("people").value),r=document.getElementById("result");
+ r.style.display="block";
+ if(a===b){r.textContent="कृपया अलग-अलग शुरुआती और गंतव्य स्टेशन चुनें।";return;}
+ r.innerHTML="<strong>डेमो यात्रा विवरण</strong><br>शुरुआती स्टेशन: "+escapeHtml(a)+
+ "<br>गंतव्य स्टेशन: "+escapeHtml(b)+"<br>यात्री: "+n+
+ "<br><br><strong>अगला कदम:</strong> आधिकारिक DMRC टिकट सेवा में वही स्टेशन चुनकर वर्तमान किराया और रूट जाँचें।<br><em>यहाँ वास्तविक किराया/समय नहीं निकाला गया है और कोई टिकट बुक नहीं हुआ है।</em>";
+});
+document.getElementById("swap").addEventListener("click",()=>{const x=from.value;from.value=to.value;to.value=x;});
+function escapeHtml(s){return s.replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+</script>
+</body>
+</html>
